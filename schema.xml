@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema name="basic-schema" version="1.6">
+	<uniqueKey>
+		id
+	</uniqueKey>
+	<fields>
+		<!-- This is the document ID and is the one set in the <uniqueKey> tag -->
+		<field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+		<!-- Version of the document. Used by Solr -->
+		<field name="_version_" type="plong" indexed="false" stored="false" />
+		<!-- Root of the document. Used by Solr -->
+		<field name="_root_" type="string" indexed="true" stored="false" docValues="false" />
+	</fields>
+	<types>
+		<!-- string type. The StrField type is not analyzed, but indexed/stored verbatim. -->
+		<fieldType name="string" class="solr.StrField" sortMissingLast="true" docValues="true" />
+		<fieldType name="strings" class="solr.StrField" sortMissingLast="true" docValues="true" multiValued="true" />
+		<!-- boolean type: "true" or "false" -->
+		<fieldType name="boolean" class="solr.BoolField" sortMissingLast="true" />
+		<fieldType name="booleans" class="solr.BoolField" sortMissingLast="true" multiValued="true" />
+		<!--
+		Numeric field types that index values using KD-trees.
+		Point fields don't support FieldCache, so they must have docValues="true" if needed for sorting, faceting, functions, etc.
+		-->
+		<fieldType name="pint" class="solr.IntPointField" docValues="true" />
+		<fieldType name="pfloat" class="solr.FloatPointField" docValues="true" />
+		<fieldType name="plong" class="solr.LongPointField" docValues="true" />
+		<fieldType name="pdouble" class="solr.DoublePointField" docValues="true" />
+		<fieldType name="pints" class="solr.IntPointField" docValues="true" multiValued="true" />
+		<fieldType name="pfloats" class="solr.FloatPointField" docValues="true" multiValued="true" />
+		<fieldType name="plongs" class="solr.LongPointField" docValues="true" multiValued="true" />
+		<fieldType name="pdoubles" class="solr.DoublePointField" docValues="true" multiValued="true" />
+		<!-- KD-tree versions of date fields -->
+		<fieldType name="pdate" class="solr.DatePointField" docValues="true" />
+		<fieldType name="pdates" class="solr.DatePointField" docValues="true" multiValued="true" />
+		<!-- Binary data type. The data should be sent/retrieved in as Base64 encoded Strings -->
+		<fieldType name="binary" class="solr.BinaryField" />
+		<!-- A specialized field for geospatial search filters and distance sorting. -->
+		<fieldType name="location" class="solr.LatLonPointSpatialField" docValues="true" />
+		<!--
+		solr.TextField allows the specification of custom text analyzers
+		specified as a tokenizer and a list of token filters. Different
+		analyzers may be specified for indexing and querying.
+		
+		The optional positionIncrementGap puts space between multiple fields of
+		this type on the same document, with the purpose of preventing false phrase
+		matching across fields.
+		-->
+		<fieldType name="text_general" class="solr.TextField" positionIncrementGap="100" multiValued="true">
+			<analyzer type="index">
+				<tokenizer class="solr.StandardTokenizerFactory" />
+				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" />
+				<filter class="solr.LowerCaseFilterFactory" />
+			</analyzer>
+			<analyzer type="query">
+				<tokenizer class="solr.StandardTokenizerFactory" />
+				<filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" />
+				<filter class="solr.SynonymGraphFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true" />
+				<filter class="solr.LowerCaseFilterFactory" />
+			</analyzer>
+		</fieldType>
+	</types>
+</schema>
